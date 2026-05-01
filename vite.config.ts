@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/VIDEO-MAKING-AI/',
   server: {
+    host: true,
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',

@@ -50,18 +50,22 @@ export function useFFmpeg(): UseFFmpegReturn {
       setStatus('processing')
       setProgress(0)
 
+      // Derive extension from filename so FFmpeg can decode any image type
+      const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'png'
+      const inputName = `image.${ext}`
+
       // Write input files to FFmpeg virtual FS
-      await ffmpeg.writeFile('image.png', await fetchFile(imageFile))
+      await ffmpeg.writeFile(inputName, await fetchFile(imageFile))
       await ffmpeg.writeFile('audio.mp3', await fetchFile(audioFile))
 
       // Combine static image + audio into MP4
       await ffmpeg.exec([
         '-loop', '1',
-        '-framerate', '2', // drastically reduces frames to encode
-        '-i', 'image.png',
+        '-framerate', '2',
+        '-i', inputName,
         '-i', 'audio.mp3',
         '-c:v', 'libx264',
-        '-preset', 'ultrafast', // maximizes encoding speed
+        '-preset', 'ultrafast',
         '-tune', 'stillimage',
         '-c:a', 'aac',
         '-b:a', '192k',

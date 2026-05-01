@@ -6,21 +6,12 @@ interface ImageUploaderProps {
   previewUrl: string | null
 }
 
-function checkAspectRatio(file: File): Promise<{ valid: boolean; ratio: string }> {
+function getImageDimensions(file: File): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      const ratio = img.width / img.height
-      const target = 16 / 9
-      const tolerance = 0.06
-      resolve({
-        valid: Math.abs(ratio - target) / target < tolerance,
-        ratio: `${img.width}×${img.height}`,
-      })
-    }
-    img.onerror = () => { URL.revokeObjectURL(url); resolve({ valid: false, ratio: '' }) }
+    img.onload = () => { URL.revokeObjectURL(url); resolve(`${img.width}×${img.height}`) }
+    img.onerror = () => { URL.revokeObjectURL(url); resolve('') }
     img.src = url
   })
 }
@@ -32,15 +23,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, previewU
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      setValidation({ ok: false, msg: 'Please upload an image file (PNG or JPG).' })
+      setValidation({ ok: false, msg: 'Please upload an image file (PNG, JPG, WebP, etc.).' })
       return
     }
-    const { valid, ratio } = await checkAspectRatio(file)
-    if (!valid) {
-      setValidation({ ok: false, msg: `Image must be 16:9. Detected: ${ratio}` })
-      return
-    }
-    setValidation({ ok: true, msg: `Great! ${ratio} — perfect 16:9 ratio.` })
+    const dims = await getImageDimensions(file)
+    setValidation({ ok: true, msg: `Image ready${dims ? ` — ${dims}` : ''}.` })
     const url = URL.createObjectURL(file)
     onImageSelected(file, url)
   }, [onImageSelected])
@@ -82,7 +69,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, previewU
         ) : (
           <div className="image-preview-container" style={{ margin: 0 }}>
             <img src={previewUrl} alt="Preview" />
-            <span className="preview-badge">16:9</span>
           </div>
         )}
       </div>

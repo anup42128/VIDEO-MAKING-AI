@@ -9,8 +9,8 @@ import { CoffeeIcon, ImageIcon, MusicIcon, ClapperboardIcon, ArrowRightIcon, Arr
 type Step = 0 | 1 | 2
 
 const STEPS = [
-  { label: 'Image',  icon: <ImageIcon /> },
-  { label: 'Audio',  icon: <MusicIcon /> },
+  { label: 'Image', icon: <ImageIcon /> },
+  { label: 'Audio', icon: <MusicIcon /> },
   { label: 'Create', icon: <ClapperboardIcon /> },
 ]
 
